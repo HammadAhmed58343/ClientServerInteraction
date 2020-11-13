@@ -1,0 +1,181 @@
+<html>
+
+<head>
+    <title>Markssheet</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+    
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.min.js" integrity="sha384-w1Q4orYjBQndcko6MimVbzY0tgp4pWB4lZ7lr30WKz0vr/aWKhXdBNmNb5D92v7s" crossorigin="anonymous"></script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <style>
+        .customButton {
+            border: 1px solid gray;
+            padding: 2px 6px 2px 6px;
+            cursor: pointer;
+        }
+
+        .customButton:hover {
+            border: 1px solid black;
+            color: red;
+            border-color: blue;
+            box-shadow: red 2px 2px 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Marksheet</h1>
+    <div>
+        <table>
+            <tr>
+                <td>
+                    <table>
+                        <tr>
+                            <td>
+                                <span>Enter the name of student :</span>
+                            </td>
+                            <td>
+                                <input type="text" id="nameOfStudent" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span>Enter the number of subjects : </span>
+                            </td>
+                            <td>
+                                <input type="number" id="noOfSubjects" min="1" onchange="UIPopulate()"
+                                    onkeyup="UIPopulate()" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <span onclick="Calculate()" class="customButton">Calculate</span>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+                <td>
+                    <table>
+                        <tr>
+                            <td>
+                                <span>Min Marks Subject: </span>
+                            </td>
+                            <td>
+                                <input type="text" id="minMarksSubject"  />
+                            </td>
+                            <td>
+                                <span>Min Marks: </span>
+                            </td>
+                            <td>
+                                <input type="text" id="minMarks"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span>Max Marks Subject: </span>
+                            </td>
+                            <td>
+                                <input type="text" id="maxMarksSubject" />
+                            </td>
+                            <td>
+                                <span>Max Marks: </span>
+                            </td>
+                            <td>
+                                <input type="text" id="maxMarks"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span>Percentage: </span>
+                            </td>
+                            <td>
+                                <input type="text" id="percentage"  />
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <hr />
+    <div>
+        <table id="inputTable">
+        </table>
+    </div>
+</body>
+<script>
+
+    function Calculate() {
+        
+        var noOfSubjects = $('#noOfSubjects').val();
+        var SubjectMarks = Array();
+
+        for(i = 0; i < noOfSubjects; i++){
+            var subjectNameId = "subjectName" + i;
+            var subjectMarksObtainedId = "subjectMarksObtained" + i;
+
+            SubjectMarks[i] = Object()
+            SubjectMarks[i].Name = $("#"+subjectNameId).val() 
+            SubjectMarks[i].ObtainMarks = $("#"+subjectMarksObtainedId).val()
+        }
+
+        $.ajax({
+                url: "https://localhost:44397/MyWebService.asmx/Calculate",
+                method: "GET",
+                contentType: "application/json",
+                data: {
+                    SubjectMarks : JSON.stringify(SubjectMarks)
+                },
+                success:function(data){
+                    var result = JSON.parse(data.d)
+                    console.log(result)
+
+                    $("#minMarksSubject").val(result.MinSubject.Name)
+                    $("#maxMarksSubject").val(result.MaxSubject.Name)
+                    $("#minMarks").val(result.MinSubject.ObtainMarks)
+                    $("#maxMarks").val(result.MaxSubject.ObtainMarks)
+                    $("#percentage").val(result.Percentage)
+                }
+            });
+    }
+
+    function UIPopulate() {
+        var noOfSubjects = $('#noOfSubjects').val();
+
+        var h = '';
+        for (i = 0; i < noOfSubjects; i++) {
+            h += '<tr>';
+
+            h += '<td>';
+            h += '<span>Subject ' + (i + 1) + ' -> </span>';
+            h += '</td>';
+
+            h += '<td>';
+            h += '<span>Name :</span>';
+            h += '</td>';
+
+            h += '<td>';
+            h += '<input type="text" id="subjectName' + i + '"/>';
+            h += '</td>';
+
+            h += '<td>';
+            h += '<span>Marks Obtained :</span>';
+            h += '</td>';
+
+            h += '<td>';
+            h += '<input type="number" min="0" max="100" id="subjectMarksObtained' + i + '"/>';
+            h += '</td>';
+
+            h += '</tr>';
+        }
+
+        $('#inputTable').html(h);
+    }
+</script>
+</html>
